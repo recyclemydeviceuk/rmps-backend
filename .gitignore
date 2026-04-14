@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env
+*.log
+uploads/
+.env.test
+.env.example
+seed.ts
+scripts/
+logs/
