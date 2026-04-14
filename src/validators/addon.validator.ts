@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const ADDON_CATEGORIES = ['protection', 'warranty', 'delivery', 'accessory'] as const;
+const ADDON_CATEGORIES = ['protection', 'warranty', 'delivery', 'accessory', 'other'] as const;
 
 export const createAddonSchema = z.object({
   name:        z.string().min(1, 'Name is required').max(100),

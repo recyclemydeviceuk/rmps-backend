@@ -1,6 +1,6 @@
 import { Schema, model, Document } from 'mongoose';
 
-const ADDON_CATEGORIES = ['protection', 'warranty', 'delivery', 'accessory'] as const;
+const ADDON_CATEGORIES = ['protection', 'warranty', 'delivery', 'accessory', 'other'] as const;
 
 export interface IAddonDoc extends Document {
   name:        string;

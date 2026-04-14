@@ -1,5 +1,12 @@
 import { Schema, model, Document } from 'mongoose';
 
+export interface IBusinessHour {
+  day:   string;
+  open:  boolean;
+  from:  string;
+  to:    string;
+}
+
 export interface ISettingsDoc extends Document {
   general: {
     businessName:    string;
@@ -11,12 +18,13 @@ export interface ISettingsDoc extends Document {
     logoUrl?:        string;
   };
   operations: {
-    openingHours:        string;
-    closingHours:        string;
-    maintenanceMode:     boolean;
-    maintenanceMessage?: string;
-    turnaroundTime:      string;
-    maxBookingsPerDay?:  number;
+    maintenanceMode:      boolean;
+    maintenanceMessage?:  string;
+    acceptNewBookings:    boolean;
+    sameDayRepairs:       boolean;
+    collectionDelivery:   boolean;
+    turnaroundTime:       string;
+    businessHours:        IBusinessHour[];
   };
   notifications: {
     emailOnNewOrder:      boolean;
@@ -28,32 +36,48 @@ export interface ISettingsDoc extends Document {
   };
 }
 
+const businessHourSchema = new Schema<IBusinessHour>(
+  { day: String, open: Boolean, from: String, to: String },
+  { _id: false },
+);
+
+const DEFAULT_HOURS: IBusinessHour[] = [
+  { day: 'Monday',    open: true,  from: '09:00', to: '18:00' },
+  { day: 'Tuesday',   open: true,  from: '09:00', to: '18:00' },
+  { day: 'Wednesday', open: true,  from: '09:00', to: '18:00' },
+  { day: 'Thursday',  open: true,  from: '09:00', to: '18:00' },
+  { day: 'Friday',    open: true,  from: '09:00', to: '18:00' },
+  { day: 'Saturday',  open: false, from: '09:00', to: '17:00' },
+  { day: 'Sunday',    open: false, from: '10:00', to: '16:00' },
+];
+
 const schema = new Schema<ISettingsDoc>(
   {
     general: {
-      businessName:    { type: String, default: 'RepairMyPhoneScreen' },
-      tagline:         { type: String },
-      phone:           { type: String, default: '' },
-      email:           { type: String, default: '' },
-      address:         { type: String, default: '' },
-      whatsappNumber:  { type: String },
-      logoUrl:         { type: String },
+      businessName:   { type: String, default: 'RepairMyPhoneScreen' },
+      tagline:        { type: String },
+      phone:          { type: String, default: '' },
+      email:          { type: String, default: '' },
+      address:        { type: String, default: '' },
+      whatsappNumber: { type: String },
+      logoUrl:        { type: String },
     },
     operations: {
-      openingHours:        { type: String, default: '09:00' },
-      closingHours:        { type: String, default: '18:00' },
-      maintenanceMode:     { type: Boolean, default: false },
-      maintenanceMessage:  { type: String },
-      turnaroundTime:      { type: String, default: '1-2 hours' },
-      maxBookingsPerDay:   { type: Number },
+      maintenanceMode:    { type: Boolean, default: false },
+      maintenanceMessage: { type: String },
+      acceptNewBookings:  { type: Boolean, default: true },
+      sameDayRepairs:     { type: Boolean, default: true },
+      collectionDelivery: { type: Boolean, default: true },
+      turnaroundTime:     { type: String,  default: '1-2 hours' },
+      businessHours:      { type: [businessHourSchema], default: DEFAULT_HOURS },
     },
     notifications: {
-      emailOnNewOrder:      { type: Boolean, default: true },
-      emailOnOrderComplete: { type: Boolean, default: true },
-      emailOnWarrantyClaim: { type: Boolean, default: true },
-      emailOnContactForm:   { type: Boolean, default: true },
+      emailOnNewOrder:      { type: Boolean, default: true  },
+      emailOnOrderComplete: { type: Boolean, default: true  },
+      emailOnWarrantyClaim: { type: Boolean, default: true  },
+      emailOnContactForm:   { type: Boolean, default: true  },
       emailOnNewsletter:    { type: Boolean, default: false },
-      adminNotifyEmail:     { type: String, default: '' },
+      adminNotifyEmail:     { type: String,  default: ''    },
     },
   },
   { timestamps: true },

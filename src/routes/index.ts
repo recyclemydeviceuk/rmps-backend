@@ -29,26 +29,26 @@ export const apiRouter = Router();
 apiRouter.use(apiLimiter);
 
 // ── Public routes (no auth) ───────────────────────────────
-apiRouter.use('/auth',    authRoutes);
-apiRouter.use('/public',  publicRoutes);
-apiRouter.use('/track',   trackRoutes);
-apiRouter.use('/forms',   formsRoutes);      // POST (form submissions) are public
+apiRouter.use('/auth',     authRoutes);
+apiRouter.use('/public',   publicRoutes);
+apiRouter.use('/track',    trackRoutes);
+apiRouter.use('/forms',    formsRoutes);      // POST (form submissions) are public
 apiRouter.use('/checkout', checkoutRoutes);
 apiRouter.use('/payment',  paymentRoutes);
+apiRouter.use('/settings', settingsRoutes);   // GET is public; PUT routes auth themselves
 
 // ── Protected admin routes ────────────────────────────────
 apiRouter.use(authenticate);
 
-apiRouter.use('/orders',       ordersRoutes);
-apiRouter.use('/customers',    customersRoutes);
-apiRouter.use('/device-types', deviceTypesRoutes);
-apiRouter.use('/brands',       brandsRoutes);
-apiRouter.use('/series',       seriesRoutes);
-apiRouter.use('/models',       modelsRoutes);
-apiRouter.use('/repair-types', repairTypesRoutes);
-apiRouter.use('/pricing',      pricingRoutes);
-apiRouter.use('/addons',       addonsRoutes);
-apiRouter.use('/analytics',      analyticsRoutes);
-apiRouter.use('/settings',       settingsRoutes);
-apiRouter.use('/upload',         uploadRoutes);
-apiRouter.use('/notifications',  notificationsRoutes);
+apiRouter.use('/orders',        ordersRoutes);
+apiRouter.use('/customers',     customersRoutes);
+apiRouter.use('/device-types',  deviceTypesRoutes);
+apiRouter.use('/brands',        brandsRoutes);
+apiRouter.use('/series',        seriesRoutes);
+apiRouter.use('/models',        modelsRoutes);
+apiRouter.use('/repair-types',  repairTypesRoutes);
+apiRouter.use('/pricing',       pricingRoutes);
+apiRouter.use('/addons',        addonsRoutes);
+apiRouter.use('/analytics',     analyticsRoutes);
+apiRouter.use('/upload',        uploadRoutes);
+apiRouter.use('/notifications', notificationsRoutes);

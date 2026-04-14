@@ -3,6 +3,8 @@ import { Customer } from '../models/Customer';
 import { PricingRule } from '../models/PricingRule';
 import { generateOrderNumber } from '../utils/orderNumber';
 import { NotificationService } from './notification.service';
+import { EmailService } from './email.service';
+import { NotificationEmailService } from './notificationEmail.service';
 
 export class CheckoutService {
   static async createCheckout(data: {
@@ -108,12 +110,37 @@ export class CheckoutService {
       lastOrderDate: new Date(),
     });
 
-    // Fire notification (non-blocking — never fails the checkout)
+    // ── In-app notification (non-blocking) ──────────────────────────────────
     NotificationService.newOrder(
       order.orderNumber,
       data.model,
       data.repairType,
       order._id.toString(),
+    ).catch(() => {});
+
+    // ── Email notifications (non-blocking) ──────────────────────────────────
+
+    // 1. Admin email: new order received
+    NotificationEmailService.fireIfEnabled(
+      'emailOnNewOrder',
+      `New Order — ${order.orderNumber}`,
+      `
+        <h2>New Repair Order Received</h2>
+        <p><strong>Order:</strong> ${order.orderNumber}</p>
+        <p><strong>Customer:</strong> ${data.customerName} (${data.customerEmail})</p>
+        <p><strong>Phone:</strong> ${data.customerPhone}</p>
+        <p><strong>Device:</strong> ${data.brand} ${data.model}</p>
+        <p><strong>Repair:</strong> ${data.repairType}</p>
+        <p><strong>Postage:</strong> ${data.postageType}</p>
+        <p><strong>Total:</strong> £${order.total.toFixed(2)}</p>
+      `,
+    ).catch(() => {});
+
+    // 2. Customer confirmation email
+    EmailService.sendOrderConfirmation(
+      data.customerEmail,
+      order.orderNumber,
+      order.total,
     ).catch(() => {});
 
     return { orderId: order._id.toString(), orderNumber: order.orderNumber, total: order.total };

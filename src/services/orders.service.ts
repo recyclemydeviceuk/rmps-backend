@@ -1,6 +1,8 @@
 import { Order } from '../models/Order';
 import { parsePagination, buildPaginationMeta } from '../utils/pagination';
 import { NotificationService } from './notification.service';
+import { EmailService } from './email.service';
+import { NotificationEmailService } from './notificationEmail.service';
 
 export class OrdersService {
   static async getOrders(query: Record<string, unknown>) {
@@ -53,13 +55,39 @@ export class OrdersService {
     const order = await Order.findByIdAndUpdate(id, update, { new: true });
     if (!order) throw Object.assign(new Error('Order not found'), { statusCode: 404 });
 
-    // Notify on meaningful status transitions
+    // ── In-app notification (non-blocking) ──────────────────────────────────
     const notifyStatuses = ['completed', 'processing', 'cancelled', 'refunded'];
     if (notifyStatuses.includes(status)) {
       NotificationService.orderStatusChanged(
         order.orderNumber,
         status,
         order._id.toString(),
+      ).catch(() => {});
+    }
+
+    // ── Email notifications (non-blocking) ──────────────────────────────────
+
+    // 1. Admin email when order is completed
+    if (status === 'completed') {
+      NotificationEmailService.fireIfEnabled(
+        'emailOnOrderComplete',
+        `Order Completed — ${order.orderNumber}`,
+        `
+          <h2>Order Marked as Completed</h2>
+          <p><strong>Order:</strong> ${order.orderNumber}</p>
+          <p><strong>Customer:</strong> ${order.customerName} (${order.customerEmail})</p>
+          <p><strong>Device:</strong> ${order.brand} ${order.model}</p>
+          <p><strong>Total:</strong> £${order.total.toFixed(2)}</p>
+        `,
+      ).catch(() => {});
+    }
+
+    // 2. Customer email: status update for all meaningful statuses
+    if (notifyStatuses.includes(status) && order.customerEmail) {
+      EmailService.sendOrderStatusUpdate(
+        order.customerEmail,
+        order.orderNumber,
+        status,
       ).catch(() => {});
     }
 

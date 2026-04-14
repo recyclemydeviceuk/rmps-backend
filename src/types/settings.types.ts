@@ -8,13 +8,21 @@ export interface GeneralSettings {
   logoUrl?:        string;
 }
 
+export interface BusinessHour {
+  day:  string;
+  open: boolean;
+  from: string;
+  to:   string;
+}
+
 export interface OperationsSettings {
-  openingHours:        string;
-  closingHours:        string;
   maintenanceMode:     boolean;
   maintenanceMessage?: string;
+  acceptNewBookings:   boolean;
+  sameDayRepairs:      boolean;
+  collectionDelivery:  boolean;
   turnaroundTime:      string;
-  maxBookingsPerDay?:  number;
+  businessHours:       BusinessHour[];
 }
 
 export interface NotificationSettings {

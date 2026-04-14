@@ -10,13 +10,21 @@ export const generalSettingsSchema = z.object({
   logoUrl:        z.string().url().optional().or(z.literal('')),
 });
 
+const businessHourSchema = z.object({
+  day:  z.string(),
+  open: z.boolean(),
+  from: z.string(),
+  to:   z.string(),
+});
+
 export const operationsSettingsSchema = z.object({
-  openingHours:        z.string().optional(),
-  closingHours:        z.string().optional(),
   maintenanceMode:     z.boolean().optional(),
   maintenanceMessage:  z.string().optional(),
+  acceptNewBookings:   z.boolean().optional(),
+  sameDayRepairs:      z.boolean().optional(),
+  collectionDelivery:  z.boolean().optional(),
   turnaroundTime:      z.string().optional(),
-  maxBookingsPerDay:   z.number().int().positive().optional(),
+  businessHours:       z.array(businessHourSchema).optional(),
 });
 
 export const notificationsSettingsSchema = z.object({
