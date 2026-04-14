@@ -22,6 +22,7 @@ import uploadRoutes         from './upload.routes';
 import publicRoutes         from './public.routes';
 import trackRoutes          from './track.routes';
 import notificationsRoutes  from './notifications.routes';
+import blogRoutes           from './blog.routes';
 
 export const apiRouter = Router();
 
@@ -36,6 +37,7 @@ apiRouter.use('/forms',    formsRoutes);      // POST (form submissions) are pub
 apiRouter.use('/checkout', checkoutRoutes);
 apiRouter.use('/payment',  paymentRoutes);
 apiRouter.use('/settings', settingsRoutes);   // GET is public; PUT routes auth themselves
+apiRouter.use('/blog',     blogRoutes);       // has both public & admin routes internally
 
 // ── Protected admin routes ────────────────────────────────
 apiRouter.use(authenticate);
