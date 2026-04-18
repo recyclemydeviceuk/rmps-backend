@@ -35,5 +35,7 @@ const schema = new Schema<IPricingRuleDoc>(
 
 // Unique constraint: one price per model+repairType combination
 schema.index({ modelId: 1, repairTypeId: 1 }, { unique: true });
+// Fast lookup of "all active pricing rules for a given model"
+schema.index({ modelId: 1, isActive: 1 });
 
 export const PricingRule = model<IPricingRuleDoc>('PricingRule', schema);

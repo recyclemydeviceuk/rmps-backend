@@ -21,4 +21,8 @@ const schema = new Schema<ISeriesDoc>(
   { timestamps: true },
 );
 
+// Indexes for fast public-catalog lookups
+schema.index({ brandId: 1, isActive: 1, name: 1 });
+schema.index({ slug: 1, brandId: 1 });
+
 export const Series = model<ISeriesDoc>('Series', schema);

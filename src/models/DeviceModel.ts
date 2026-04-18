@@ -33,4 +33,13 @@ const schema = new Schema<IDeviceModelDoc>(
   { timestamps: true },
 );
 
+// ── Indexes for fast public catalog queries ─────────────────────────────────
+// Compound: most frequent query is "all active models for a brand (& optional series)"
+schema.index({ brandId: 1, isActive: 1, name: 1 });
+schema.index({ brandId: 1, seriesId: 1, isActive: 1, name: 1 });
+// Search-by-slug (slug is already unique but adding for explicitness when combined with isActive)
+schema.index({ slug: 1, isActive: 1 });
+// For case-insensitive model name searches triggered by the search-bar
+schema.index({ name: 'text', brandName: 'text' });
+
 export const DeviceModel = model<IDeviceModelDoc>('DeviceModel', schema);

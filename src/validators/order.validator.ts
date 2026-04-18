@@ -20,7 +20,7 @@ export const updateOrderSchema = z.object({
   brand:         z.string().max(100).optional(),
   model:         z.string().max(100).optional(),
   repairType:    z.string().max(100).optional(),
-  postageType:   z.enum(['print-label', 'send-pack']).optional(),
+  postageType:   z.enum(['print-label', 'send-pack', 'collection']).optional(),
 });
 
 export const addOrderNoteSchema = z.object({

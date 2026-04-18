@@ -15,10 +15,30 @@ export class CheckoutService {
     brand:         string;
     model:         string;
     repairType:    string;
-    postageType:   'print-label' | 'send-pack';
+    postageType:   'print-label' | 'send-pack' | 'collection';
+    collectionAddress?:  string;
+    collectionPostcode?: string;
     items:         { repairTypeId: string; repairTypeName: string; modelId: string; modelName: string; quantity: number; unitPrice: number }[];
     addons?:       { addonId: string; name: string; price: number }[];
   }) {
+    // ── Guard: 'collection' service is Preston-area-only ────────────────────
+    if (data.postageType === 'collection') {
+      if (!data.collectionPostcode) {
+        throw Object.assign(
+          new Error('Collection postcode is required for Collection & Delivery service'),
+          { statusCode: 400 },
+        );
+      }
+      const pc = data.collectionPostcode.trim().toUpperCase().replace(/\s+/g, '');
+      // Preston area postcodes start with PR1–PR9 + PR25, PR26 (Leyland area).
+      const isPreston = /^PR([1-9]|25|26)[A-Z0-9]+$/.test(pc);
+      if (!isPreston) {
+        throw Object.assign(
+          new Error('Collection & Delivery is only available for customers in the Preston area (PR postcodes). Please choose another postage option.'),
+          { statusCode: 400 },
+        );
+      }
+    }
     // ── 1. Verify prices against the database ────────────────────────────────
     // The frontend sends slugs (not ObjectIds) for modelId / repairTypeId, so
     // we query by the denormalized string fields (modelName + repairTypeName)
@@ -96,6 +116,8 @@ export class CheckoutService {
       model:         data.model,
       repairType:    data.repairType,
       postageType:   data.postageType,
+      collectionAddress:  data.collectionAddress,
+      collectionPostcode: data.collectionPostcode,
       items:         orderItems,
       subtotal,
       total:         subtotal,
@@ -131,7 +153,8 @@ export class CheckoutService {
         <p><strong>Phone:</strong> ${data.customerPhone}</p>
         <p><strong>Device:</strong> ${data.brand} ${data.model}</p>
         <p><strong>Repair:</strong> ${data.repairType}</p>
-        <p><strong>Postage:</strong> ${data.postageType}</p>
+        <p><strong>Postage:</strong> ${data.postageType}${data.postageType === 'collection' ? ' (Preston area collection)' : ''}</p>
+        ${data.postageType === 'collection' && data.collectionAddress ? `<p><strong>Collection Address:</strong> ${data.collectionAddress} (${data.collectionPostcode})</p>` : ''}
         <p><strong>Total:</strong> £${order.total.toFixed(2)}</p>
       `,
     ).catch(() => {});

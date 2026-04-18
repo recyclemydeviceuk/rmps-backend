@@ -8,6 +8,7 @@ export interface IBrandDoc extends Document {
   logoUrl?:          string;
   showcaseImageUrl?: string;
   modelCount:        number;
+  hasSeries:         boolean;
   isActive:          boolean;
 }
 
@@ -20,9 +21,14 @@ const schema = new Schema<IBrandDoc>(
     logoUrl:          { type: String },
     showcaseImageUrl: { type: String },
     modelCount:       { type: Number, default: 0 },
+    hasSeries:        { type: Boolean, default: false },
     isActive:         { type: Boolean, default: true },
   },
   { timestamps: true },
 );
+
+// Fast filter for "brands of a given device type"
+schema.index({ deviceTypeId: 1, isActive: 1, name: 1 });
+schema.index({ slug: 1, isActive: 1 });
 
 export const Brand = model<IBrandDoc>('Brand', schema);
