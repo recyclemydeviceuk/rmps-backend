@@ -12,9 +12,13 @@ const orderItemSchema = z.object({
 });
 
 const addonItemSchema = z.object({
-  addonId:  z.string().min(1).max(100),
-  name:     z.string().max(200),
-  price:    z.number().min(0).max(999),
+  addonId:       z.string().min(1).max(100),
+  name:          z.string().max(200),
+  price:         z.number().min(0).max(999),
+  selectedColor: z.object({
+    name: z.string().min(1).max(50),
+    hex:  z.string().regex(/^#([0-9a-fA-F]{3}){1,2}$/),
+  }).optional(),
 });
 
 export const checkoutSchema = z.object({

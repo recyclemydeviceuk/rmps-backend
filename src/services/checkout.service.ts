@@ -1,6 +1,7 @@
 import { Order } from '../models/Order';
 import { Customer } from '../models/Customer';
 import { PricingRule } from '../models/PricingRule';
+import { Addon } from '../models/Addon';
 import { generateOrderNumber } from '../utils/orderNumber';
 import { NotificationService } from './notification.service';
 import { EmailService } from './email.service';
@@ -19,7 +20,7 @@ export class CheckoutService {
     collectionAddress?:  string;
     collectionPostcode?: string;
     items:         { repairTypeId: string; repairTypeName: string; modelId: string; modelName: string; quantity: number; unitPrice: number }[];
-    addons?:       { addonId: string; name: string; price: number }[];
+    addons?:       { addonId: string; name: string; price: number; selectedColor?: { name: string; hex: string } }[];
   }) {
     // ── Guard: 'collection' service is Preston-area-only ────────────────────
     if (data.postageType === 'collection') {
@@ -89,10 +90,36 @@ export class CheckoutService {
     // Add addons as line items if any
     if (data.addons?.length) {
       for (const addon of data.addons) {
+        // ── Guard: if the add-on has a colour palette defined in DB, a colour MUST be chosen
+        const dbAddon = await Addon.findById(addon.addonId).select('name colors').lean();
+        if (dbAddon?.colors && dbAddon.colors.length > 0) {
+          if (!addon.selectedColor) {
+            throw Object.assign(
+              new Error(`Please choose a colour for "${dbAddon.name}" before placing the order.`),
+              { statusCode: 400 },
+            );
+          }
+          // Verify the selected colour is one actually offered
+          const valid = dbAddon.colors.some(c =>
+            c.name.toLowerCase() === addon.selectedColor!.name.toLowerCase() &&
+            c.hex.toLowerCase()  === addon.selectedColor!.hex.toLowerCase(),
+          );
+          if (!valid) {
+            throw Object.assign(
+              new Error(`"${addon.selectedColor.name}" isn't an available colour for "${dbAddon.name}".`),
+              { statusCode: 400 },
+            );
+          }
+        }
+
+        const description = addon.selectedColor
+          ? `${addon.name} — ${addon.selectedColor.name}`
+          : addon.name;
+
         orderItems.push({
           repairType:  'Add-on',
           deviceModel: addon.name,
-          description: addon.name,
+          description,
           quantity:    1,
           unitPrice:   addon.price,
           totalPrice:  addon.price,
