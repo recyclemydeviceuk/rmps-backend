@@ -1,4 +1,6 @@
 import { DeviceType } from '../models/DeviceType';
+import { Brand } from '../models/Brand';
+import { DeviceModel } from '../models/DeviceModel';
 import { generateSlug } from '../utils/slugify';
 
 export class DeviceTypesService {
@@ -18,9 +20,21 @@ export class DeviceTypesService {
   }
 
   static async update(id: string, data: Partial<{ name: string; slug: string; imageUrl: string; isActive: boolean }>) {
-    if (data.name && !data.slug) data.slug = generateSlug(data.name);
-    const item = await DeviceType.findByIdAndUpdate(id, data, { new: true, runValidators: true });
+    // Slug is IMMUTABLE after creation — changing it would break:
+    //   • Customer-facing URLs (/book-repair/:slug)
+    //   • VALID_TABS routing guards in the app
+    //   • Brand.deviceTypeName denormalised references
+    // Admin can freely edit name / image / active flag — but slug stays.
+    const { slug: _ignored, ...safeData } = data;
+    const item = await DeviceType.findByIdAndUpdate(id, safeData, { new: true, runValidators: true });
     if (!item) throw Object.assign(new Error('Device type not found'), { statusCode: 404 });
+
+    // Cascade name changes to denormalised `deviceTypeName` on brands + models
+    if (typeof safeData.name === 'string') {
+      await Brand.updateMany({ deviceTypeId: item._id }, { $set: { deviceTypeName: item.name } });
+      await DeviceModel.updateMany({ deviceTypeId: item._id }, { $set: { deviceTypeName: item.name } });
+    }
+
     return item;
   }
 
