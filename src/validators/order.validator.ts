@@ -1,10 +1,25 @@
 import { z } from 'zod';
 
-const ORDER_STATUSES = ['pending', 'paid', 'processing', 'completed', 'failed', 'refunded', 'cancelled'] as const;
+/**
+ * Statuses that an admin is allowed to transition an order to.
+ *
+ * `pending` and `paid` are deliberately EXCLUDED — they represent the
+ * pre-fulfilment payment lifecycle and are driven exclusively by the
+ * PayPal webhook (unpaid → pending order → paid once confirmed).
+ *
+ * Once an order is paid, the admin can progress it through the
+ * fulfilment workflow: processing → completed / failed / cancelled /
+ * refunded.
+ */
+const ADMIN_ALLOWED_STATUSES = ['processing', 'completed', 'failed', 'refunded', 'cancelled'] as const;
 
 // Only the ORDER workflow status — never touches paymentStatus
 export const updateOrderStatusSchema = z.object({
-  status: z.enum(ORDER_STATUSES),
+  status: z.enum(ADMIN_ALLOWED_STATUSES, {
+    errorMap: () => ({
+      message: 'Status can only be set to processing, completed, failed, refunded or cancelled. Pending/paid are derived from payment status.',
+    }),
+  }),
 });
 
 // General order update: only safe mutable fields are allowed.

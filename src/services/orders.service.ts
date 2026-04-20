@@ -50,6 +50,27 @@ export class OrdersService {
   }
 
   static async updateOrderStatus(id: string, status: string) {
+    // Admin can only set workflow statuses — never pending/paid
+    const ADMIN_ALLOWED = new Set(['processing', 'completed', 'failed', 'refunded', 'cancelled']);
+    if (!ADMIN_ALLOWED.has(status)) {
+      throw Object.assign(
+        new Error('Pending/paid are payment-driven and cannot be set manually.'),
+        { statusCode: 400 },
+      );
+    }
+
+    // Ensure the order is actually paid before letting admin progress it.
+    // (Refunded orders can still be marked 'refunded' — handled below.)
+    const existing = await Order.findById(id).select('paymentStatus status').lean();
+    if (!existing) throw Object.assign(new Error('Order not found'), { statusCode: 404 });
+
+    if (existing.paymentStatus !== 'paid' && existing.paymentStatus !== 'refunded') {
+      throw Object.assign(
+        new Error(`Cannot change status on an unpaid order. Current payment status: ${existing.paymentStatus}.`),
+        { statusCode: 400 },
+      );
+    }
+
     const update: Record<string, unknown> = { status };
     if (status === 'completed') update.completedAt = new Date();
     const order = await Order.findByIdAndUpdate(id, update, { new: true });
