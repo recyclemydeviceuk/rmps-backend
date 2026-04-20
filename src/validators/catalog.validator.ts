@@ -3,6 +3,7 @@ import { z } from 'zod';
 export const createDeviceTypeSchema = z.object({
   name:      z.string().min(1, 'Name is required').max(100),
   slug:      z.string().optional(),
+  subtitle:  z.string().max(200).optional().or(z.literal('')),
   imageUrl:  z.string().url().optional().or(z.literal('')),
   isActive:  z.boolean().optional().default(true),
 });

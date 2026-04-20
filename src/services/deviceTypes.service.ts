@@ -14,12 +14,12 @@ export class DeviceTypesService {
     return item;
   }
 
-  static async create(data: { name: string; slug?: string; imageUrl?: string; isActive?: boolean }) {
+  static async create(data: { name: string; slug?: string; subtitle?: string; imageUrl?: string; isActive?: boolean }) {
     const slug = data.slug || generateSlug(data.name);
     return DeviceType.create({ ...data, slug });
   }
 
-  static async update(id: string, data: Partial<{ name: string; slug: string; imageUrl: string; isActive: boolean }>) {
+  static async update(id: string, data: Partial<{ name: string; slug: string; subtitle: string; imageUrl: string; isActive: boolean }>) {
     // Slug is IMMUTABLE after creation — changing it would break:
     //   • Customer-facing URLs (/book-repair/:slug)
     //   • VALID_TABS routing guards in the app
