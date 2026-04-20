@@ -15,7 +15,7 @@ export const apiLimiter = rateLimit({
 /** Stricter limiter for auth endpoints */
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max:      isDev ? 1_000 : 20,   // raised from 10 → 20 to allow for genuine retry attempts
+  max:      isDev ? 1_000 : 20,   // raised from 10 → 20 to allow for legitimate retry attempts
   standardHeaders: true,
   legacyHeaders:   false,
   skip:     () => isDev,
