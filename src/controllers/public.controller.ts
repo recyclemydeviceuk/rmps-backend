@@ -21,7 +21,9 @@ function setCatalogCache(res: Response, seconds = 3600) {
 
 export const getPublicDeviceTypes = asyncHandler(async (_req: Request, res: Response) => {
   const types = await DeviceTypesService.getAll({ isActive: true });
-  setCatalogCache(res);
+  // Short HTTP cache (60s) — admin edits (name / image) should surface quickly
+  // on customer pages without forcing hard-refresh.
+  setCatalogCache(res, 60);
   sendSuccess(res, types, 'Device types retrieved');
 });
 
