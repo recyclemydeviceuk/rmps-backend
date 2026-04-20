@@ -2,7 +2,10 @@ import { Schema, model, Document } from 'mongoose';
 
 const REPAIR_CATEGORIES = ['screen', 'battery', 'camera', 'back_glass', 'charging_port', 'speaker', 'other'] as const;
 
-export const WARRANTY_OPTIONS = ['30 Days', '90 Days', '6 Months', '12 Months', '1 Year', 'Lifetime'] as const;
+// Single standard warranty across the whole site — kept as a 1-item
+// tuple rather than a plain string so the rest of the codebase keeps
+// working through the existing enum type.
+export const WARRANTY_OPTIONS = ['12 Months'] as const;
 export type WarrantyOption = typeof WARRANTY_OPTIONS[number];
 
 export interface IRepairTypeDoc extends Document {
