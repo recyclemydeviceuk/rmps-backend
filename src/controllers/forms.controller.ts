@@ -19,6 +19,11 @@ export const unsubscribeNewsletter = asyncHandler(async (req: Request, res: Resp
   sendSuccess(res, sub, 'Unsubscribed');
 });
 
+export const deleteNewsletter = asyncHandler(async (req: Request, res: Response) => {
+  await FormsService.deleteNewsletter(req.params.id);
+  sendNoContent(res);
+});
+
 // ── Contact ───────────────────────────────────────────────
 export const getContactSubmissions = asyncHandler(async (req: Request, res: Response) => {
   const result = await FormsService.getContactSubmissions(req.query);

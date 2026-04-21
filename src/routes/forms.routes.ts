@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import {
   // Newsletter
-  getNewsletterSubmissions, subscribeNewsletter, unsubscribeNewsletter,
+  getNewsletterSubmissions, subscribeNewsletter, unsubscribeNewsletter, deleteNewsletter,
   // Contact
   getContactSubmissions, getContactSubmission, submitContact, updateContactStatus, deleteContact,
   // Warranty
@@ -19,6 +19,7 @@ router.post('/newsletter',           validateBody(newsletterSchema), subscribeNe
 // Admin: list + manage
 router.get('/newsletter',            authenticate, getNewsletterSubmissions);
 router.patch('/newsletter/:id/unsubscribe', authenticate, unsubscribeNewsletter);
+router.delete('/newsletter/:id',            authenticate, deleteNewsletter);
 
 // ── Contact ───────────────────────────────────────────────
 // Public: submit form

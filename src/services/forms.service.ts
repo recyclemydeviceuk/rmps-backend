@@ -58,6 +58,11 @@ export class FormsService {
     return sub;
   }
 
+  static async deleteNewsletter(id: string) {
+    const sub = await NewsletterSubmission.findByIdAndDelete(id);
+    if (!sub) throw Object.assign(new Error('Subscription not found'), { statusCode: 404 });
+  }
+
   // ── Contact ─────────────────────────────────────────────
   static async getContactSubmissions(query: Record<string, unknown>) {
     const { page, limit, skip } = parsePagination(query.page as string, query.limit as string);
