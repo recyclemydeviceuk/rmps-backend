@@ -15,8 +15,11 @@ import { PricingRule } from '../models/PricingRule';
 import { RepairType } from '../models/RepairType';
 
 // ── Simple in-process HTTP cache headers (1 hour) for the essentially-static catalog
-function setCatalogCache(res: Response, seconds = 3600) {
-  res.setHeader('Cache-Control', `public, max-age=${seconds}, stale-while-revalidate=86400`);
+function setCatalogCache(res: Response, seconds = 60) {
+  // Short max-age so admin edits (brands, models, logos, showcase images,
+  // repair types, add-ons) surface on the customer site without waiting
+  // an hour. `stale-while-revalidate` is also kept short for the same reason.
+  res.setHeader('Cache-Control', `public, max-age=${seconds}, stale-while-revalidate=120`);
 }
 
 export const getPublicDeviceTypes = asyncHandler(async (_req: Request, res: Response) => {
