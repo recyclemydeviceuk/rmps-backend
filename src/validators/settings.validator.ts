@@ -20,8 +20,6 @@ const businessHourSchema = z.object({
 export const operationsSettingsSchema = z.object({
   maintenanceMode:     z.boolean().optional(),
   maintenanceMessage:  z.string().optional(),
-  acceptNewBookings:   z.boolean().optional(),
-  sameDayRepairs:      z.boolean().optional(),
   collectionDelivery:  z.boolean().optional(),
   turnaroundTime:      z.string().optional(),
   businessHours:       z.array(businessHourSchema).optional(),

@@ -20,8 +20,6 @@ export interface ISettingsDoc extends Document {
   operations: {
     maintenanceMode:      boolean;
     maintenanceMessage?:  string;
-    acceptNewBookings:    boolean;
-    sameDayRepairs:       boolean;
     collectionDelivery:   boolean;
     turnaroundTime:       string;
     businessHours:        IBusinessHour[];
@@ -65,8 +63,6 @@ const schema = new Schema<ISettingsDoc>(
     operations: {
       maintenanceMode:    { type: Boolean, default: false },
       maintenanceMessage: { type: String },
-      acceptNewBookings:  { type: Boolean, default: true },
-      sameDayRepairs:     { type: Boolean, default: true },
       collectionDelivery: { type: Boolean, default: true },
       turnaroundTime:     { type: String,  default: '1-2 hours' },
       businessHours:      { type: [businessHourSchema], default: DEFAULT_HOURS },
