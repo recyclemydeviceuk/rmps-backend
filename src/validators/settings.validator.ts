@@ -10,19 +10,10 @@ export const generalSettingsSchema = z.object({
   logoUrl:        z.string().url().optional().or(z.literal('')),
 });
 
-const businessHourSchema = z.object({
-  day:  z.string(),
-  open: z.boolean(),
-  from: z.string(),
-  to:   z.string(),
-});
-
 export const operationsSettingsSchema = z.object({
   maintenanceMode:     z.boolean().optional(),
   maintenanceMessage:  z.string().optional(),
   collectionDelivery:  z.boolean().optional(),
-  turnaroundTime:      z.string().optional(),
-  businessHours:       z.array(businessHourSchema).optional(),
 });
 
 export const notificationsSettingsSchema = z.object({
@@ -31,5 +22,4 @@ export const notificationsSettingsSchema = z.object({
   emailOnWarrantyClaim: z.boolean().optional(),
   emailOnContactForm:   z.boolean().optional(),
   emailOnNewsletter:    z.boolean().optional(),
-  adminNotifyEmail:     z.string().email().optional().or(z.literal('')),
 });

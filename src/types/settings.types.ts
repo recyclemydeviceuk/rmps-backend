@@ -8,19 +8,10 @@ export interface GeneralSettings {
   logoUrl?:        string;
 }
 
-export interface BusinessHour {
-  day:  string;
-  open: boolean;
-  from: string;
-  to:   string;
-}
-
 export interface OperationsSettings {
   maintenanceMode:     boolean;
   maintenanceMessage?: string;
   collectionDelivery:  boolean;
-  turnaroundTime:      string;
-  businessHours:       BusinessHour[];
 }
 
 export interface NotificationSettings {
@@ -29,7 +20,6 @@ export interface NotificationSettings {
   emailOnWarrantyClaim: boolean;
   emailOnContactForm:   boolean;
   emailOnNewsletter:    boolean;
-  adminNotifyEmail:     string;
 }
 
 export interface ISettings {

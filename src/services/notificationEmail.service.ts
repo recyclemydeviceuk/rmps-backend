@@ -18,7 +18,7 @@ export class NotificationEmailService {
    * @param toggle   One of the five notification boolean fields
    * @param subject  Email subject line
    * @param html     Email body HTML
-   * @param to       Override recipient — defaults to settings.adminNotifyEmail
+   * @param to       Override recipient — defaults to settings.general.email
    */
   static async fireIfEnabled(
     toggle: 'emailOnNewOrder' | 'emailOnOrderComplete' | 'emailOnWarrantyClaim' | 'emailOnContactForm' | 'emailOnNewsletter',
@@ -33,7 +33,7 @@ export class NotificationEmailService {
 
       if (!notif[toggle]) return; // disabled in admin panel
 
-      const adminEmail = to ?? notif.adminNotifyEmail;
+      const adminEmail = to ?? settings?.general?.email;
       await EmailService.sendAdminNotification(subject, html, adminEmail || undefined);
     } catch (err) {
       logger.error('NotificationEmailService.fireIfEnabled error:', err);
@@ -46,7 +46,7 @@ export class NotificationEmailService {
   static async getAdminEmail(): Promise<string> {
     try {
       const settings = await Settings.findOne().lean();
-      return settings?.notifications?.adminNotifyEmail ?? '';
+      return settings?.general?.email ?? '';
     } catch {
       return '';
     }
