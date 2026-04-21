@@ -3,7 +3,53 @@ import { Order } from '../models/Order';
 import { paypalConfig } from '../config/paypal';
 import { env } from '../config/env';
 import { NotificationService } from './notification.service';
+import { EmailService } from './email.service';
+import { NotificationEmailService } from './notificationEmail.service';
 import type { CreatePaymentDTO } from '../types/payment.types';
+
+/**
+ * Marks an order paid *only if it wasn't already*, then fires the new-order
+ * notifications. The conditional update keeps this idempotent so that the
+ * client-side capture endpoint and the PayPal webhook can both call it for
+ * the same order without double-sending emails.
+ *
+ * `lookup` is whatever locates the order: usually `{ _id }` from the capture
+ * endpoint or `{ paypalOrderId }` from the webhook.
+ */
+async function markPaidAndNotify(lookup: Record<string, unknown>) {
+  const order = await Order.findOneAndUpdate(
+    { ...lookup, paymentStatus: { $ne: 'paid' } },
+    { status: 'paid', paymentStatus: 'paid' },
+    { new: true },
+  );
+  if (!order) return null; // already paid (or not found) — skip notifications
+
+  // In-app admin notification
+  NotificationService.paymentReceived(order.orderNumber, order.total, order._id.toString()).catch(() => {});
+  NotificationService.newOrder(order.orderNumber, order.model, order.repairType, order._id.toString()).catch(() => {});
+
+  // Admin email: new order (now truly new, since it's paid)
+  NotificationEmailService.fireIfEnabled(
+    'emailOnNewOrder',
+    `New Order — ${order.orderNumber}`,
+    `
+      <h2>New Repair Order Received</h2>
+      <p><strong>Order:</strong> ${order.orderNumber}</p>
+      <p><strong>Customer:</strong> ${order.customerName} (${order.customerEmail})</p>
+      <p><strong>Phone:</strong> ${order.customerPhone}</p>
+      <p><strong>Device:</strong> ${order.brand} ${order.model}</p>
+      <p><strong>Repair:</strong> ${order.repairType}</p>
+      <p><strong>Postage:</strong> ${order.postageType}${order.postageType === 'collection' ? ' (Preston area collection)' : ''}</p>
+      ${order.postageType === 'collection' && order.collectionAddress ? `<p><strong>Collection Address:</strong> ${order.collectionAddress} (${order.collectionPostcode})</p>` : ''}
+      <p><strong>Total:</strong> £${order.total.toFixed(2)}</p>
+    `,
+  ).catch(() => {});
+
+  // Customer confirmation email — fired here (post-payment), not at checkout
+  EmailService.sendOrderConfirmation(order.customerEmail, order.orderNumber, order.total).catch(() => {});
+
+  return order;
+}
 
 async function getPayPalAccessToken(): Promise<string> {
   const credentials = Buffer.from(`${paypalConfig.clientId}:${paypalConfig.clientSecret}`).toString('base64');
@@ -86,14 +132,7 @@ export class PaymentService {
     );
 
     if (res.data.status === 'COMPLETED') {
-      const updated = await Order.findByIdAndUpdate(orderId, { status: 'paid', paymentStatus: 'paid' }, { new: true });
-      if (updated) {
-        NotificationService.paymentReceived(
-          updated.orderNumber,
-          updated.total,
-          updated._id.toString(),
-        ).catch(() => {});
-      }
+      await markPaidAndNotify({ _id: orderId });
     }
 
     return { status: res.data.status as string, orderId };
@@ -123,14 +162,7 @@ export class PaymentService {
 
     // ── Process verified event ────────────────────────────────────────────
     if (payload.event_type === 'PAYMENT.CAPTURE.COMPLETED') {
-      const order = await Order.findOneAndUpdate(
-        { paypalOrderId: payload.resource.id },
-        { status: 'paid', paymentStatus: 'paid' },
-        { new: true },
-      );
-      if (order) {
-        NotificationService.paymentReceived(order.orderNumber, order.total, order._id.toString()).catch(() => {});
-      }
+      await markPaidAndNotify({ paypalOrderId: payload.resource.id });
     }
     if (payload.event_type === 'PAYMENT.CAPTURE.REFUNDED') {
       const order = await Order.findOneAndUpdate(
