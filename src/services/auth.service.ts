@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { env } from '../config/env';
+import { AdminUser } from '../models/AdminUser';
 import type { LoginCredentials, AuthResult } from '../types/auth.types';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -9,57 +10,52 @@ function invalidCredentials(): never {
 
 export class AuthService {
   /**
-   * Validates credentials purely against the values set in the server .env file
-   * (ADMIN_EMAIL / ADMIN_PASSWORD).  No database lookup is performed — the only
-   * admin that can ever log in is the one configured in the environment.
+   * Validates credentials against the `AdminUser` collection in MongoDB.
+   * Admins can only be provisioned through the gated `createAdminUser` script,
+   * so there is no public signup endpoint.
    */
   static async login(credentials: LoginCredentials): Promise<AuthResult> {
     const { email, password } = credentials;
 
-    // Ensure env creds are actually configured
-    if (!env.ADMIN_EMAIL || !env.ADMIN_PASSWORD) {
-      console.error('[auth] ADMIN_EMAIL or ADMIN_PASSWORD is not set in .env');
-      invalidCredentials();
-    }
+    const admin = await AdminUser.findOne({
+      email: email.trim().toLowerCase(),
+    });
+    if (!admin || !admin.isActive) invalidCredentials();
 
-    // Case-insensitive email match; exact password match
-    if (email.trim().toLowerCase() !== env.ADMIN_EMAIL.trim().toLowerCase()) {
-      invalidCredentials();
-    }
+    const ok = await admin.comparePassword(password);
+    if (!ok) invalidCredentials();
 
-    if (password !== env.ADMIN_PASSWORD) {
-      invalidCredentials();
-    }
-
+    const adminId = admin._id.toString();
     const token = jwt.sign(
-      { adminId: 'env-admin', email: env.ADMIN_EMAIL.toLowerCase() },
+      { adminId, email: admin.email },
       env.JWT_SECRET,
       { expiresIn: env.JWT_EXPIRES_IN as any },
     );
 
-    const admin = {
-      _id:      'env-admin',
-      name:     'Admin',
-      email:    env.ADMIN_EMAIL.toLowerCase(),
-      isActive: true,
+    return {
+      token,
+      admin: {
+        _id:      adminId,
+        name:     admin.name,
+        email:    admin.email,
+        isActive: admin.isActive,
+      } as never,
     };
-
-    return { token, admin: admin as never };
   }
 
   /**
-   * Returns the admin profile derived from env — no DB needed.
+   * Returns the admin profile for the id embedded in the JWT.
    */
-  static async getProfile(_adminId: string) {
-    if (!env.ADMIN_EMAIL) {
-      throw Object.assign(new Error('Admin not configured'), { statusCode: 404 });
+  static async getProfile(adminId: string) {
+    const admin = await AdminUser.findById(adminId);
+    if (!admin || !admin.isActive) {
+      throw Object.assign(new Error('Admin not found'), { statusCode: 404 });
     }
-
     return {
-      _id:      'env-admin',
-      name:     'Admin',
-      email:    env.ADMIN_EMAIL.toLowerCase(),
-      isActive: true,
+      _id:      admin._id.toString(),
+      name:     admin.name,
+      email:    admin.email,
+      isActive: admin.isActive,
     };
   }
 }
