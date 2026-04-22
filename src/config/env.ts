@@ -13,8 +13,10 @@ export const env = {
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '7d',
 
   // ── Admin ────────────────────────────────────────────────
-  ADMIN_EMAIL:    process.env.ADMIN_EMAIL    || '',
-  ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || '',
+  // Admins themselves live in the `adminusers` collection (see AdminUser model).
+  // ADMIN_CREATE_KEY gates the createAdminUser script — required to create or
+  // reset an admin. Must match the SHA-256 hash baked into that script.
+  ADMIN_CREATE_KEY: process.env.ADMIN_CREATE_KEY || '',
 
   // ── AWS S3 (Image Storage) ───────────────────────────────
   AWS_S3_ACCESS_KEY_ID:     process.env.AWS_S3_ACCESS_KEY_ID     || '',
@@ -50,8 +52,6 @@ if (env.NODE_ENV === 'production') {
 
   if (!env.MONGODB_URI || env.MONGODB_URI.includes('localhost'))       missing.push('MONGODB_URI');
   if (!env.JWT_SECRET || env.JWT_SECRET === 'dev_jwt_secret_change_in_production') missing.push('JWT_SECRET');
-  if (!env.ADMIN_EMAIL)                                                  missing.push('ADMIN_EMAIL');
-  if (!env.ADMIN_PASSWORD)                                               missing.push('ADMIN_PASSWORD');
   if (!env.PAYPAL_CLIENT_ID)                                             missing.push('PAYPAL_CLIENT_ID');
   if (!env.PAYPAL_CLIENT_SECRET)                                         missing.push('PAYPAL_CLIENT_SECRET');
   if (!env.PAYPAL_WEBHOOK_ID) {

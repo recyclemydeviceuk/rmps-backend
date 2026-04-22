@@ -47,9 +47,10 @@ export class EmailService {
   }
 
   static async sendAdminNotification(subject: string, html: string, to?: string) {
-    const recipient = to || env.ADMIN_EMAIL;
-    if (!recipient) return; // no admin email configured — skip silently
-    await send(recipient, subject, html);
+    // Recipient is always passed by NotificationEmailService (settings.general.email).
+    // If it's missing, we skip silently rather than send to a stale env value.
+    if (!to) return;
+    await send(to, subject, html);
   }
 
   static async sendContactAcknowledgement(to: string, name: string) {
