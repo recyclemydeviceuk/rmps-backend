@@ -7,7 +7,6 @@ export interface IPricingRule {
   repairTypeName: string;
   category:       string;
   price:          number;
-  originalPrice?: number;
   isActive:       boolean;
   createdAt:      Date;
   updatedAt:      Date;
@@ -17,6 +16,5 @@ export interface CreatePricingRuleDTO {
   modelId:        string;
   repairTypeId:   string;
   price:          number;
-  originalPrice?: number;
   isActive?:      boolean;
 }

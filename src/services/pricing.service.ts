@@ -34,7 +34,7 @@ export class PricingService {
     return rule;
   }
 
-  static async create(data: { modelId: string; repairTypeId: string; price: number; originalPrice?: number; isActive?: boolean }) {
+  static async create(data: { modelId: string; repairTypeId: string; price: number; isActive?: boolean }) {
     const [model, repairType] = await Promise.all([
       DeviceModel.findById(data.modelId),
       RepairType.findById(data.repairTypeId),

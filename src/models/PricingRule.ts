@@ -8,13 +8,14 @@ export interface IPricingRuleDoc extends Document {
   repairTypeName: string;
   category:       string;
   price:          number;
-  originalPrice?: number;
   description?:   string;
   warranty?:      string;
   turnaround?:    string;
   isActive:       boolean;
 }
 
+// `strict: 'throw'` would reject legacy `originalPrice` values already in the
+// DB; we keep the default `strict: true` which just ignores unknown fields.
 const schema = new Schema<IPricingRuleDoc>(
   {
     modelId:        { type: Schema.Types.ObjectId, ref: 'DeviceModel', required: true },
@@ -24,7 +25,6 @@ const schema = new Schema<IPricingRuleDoc>(
     repairTypeName: { type: String, required: true },
     category:       { type: String, required: true },
     price:          { type: Number, required: true, min: 0 },
-    originalPrice:  { type: Number, min: 0 },
     description:    { type: String },
     warranty:       { type: String },
     turnaround:     { type: String },

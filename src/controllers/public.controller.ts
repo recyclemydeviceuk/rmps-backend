@@ -62,13 +62,16 @@ export const getPublicRepairTypes = asyncHandler(async (_req: Request, res: Resp
 
 export const getPublicPricingByModel = asyncHandler(async (req: Request, res: Response) => {
   const rules = await PricingService.getByModel(req.params.modelId);
-  setCatalogCache(res, 600); // pricing cached 10 min (could change more often than brands)
+  // Never HTTP-cache live prices — admin edits must surface on the customer
+  // site immediately. A long max-age here was causing updated repair prices
+  // to keep showing the old value in browsers for up to 10 minutes.
+  res.setHeader('Cache-Control', 'no-store, max-age=0');
   sendSuccess(res, rules, 'Model pricing retrieved');
 });
 
 export const getPublicPricing = asyncHandler(async (req: Request, res: Response) => {
   const rule = await PricingService.getByModelAndRepair(req.params.modelId, req.params.repairTypeId);
-  setCatalogCache(res, 600);
+  res.setHeader('Cache-Control', 'no-store, max-age=0');
   sendSuccess(res, rule, 'Pricing retrieved');
 });
 
@@ -288,8 +291,9 @@ export const getPublicModelBundle = asyncHandler(async (req: Request, res: Respo
     return;
   }
 
-  // Simple cache — pricing doesn't change often
-  setCatalogCache(res, 600);
+  // Never HTTP-cache this — the bundle includes live prices, which admin
+  // edits must reflect immediately on the customer site.
+  res.setHeader('Cache-Control', 'no-store, max-age=0');
   sendSuccess(res, result, 'Model bundle retrieved');
 });
 
