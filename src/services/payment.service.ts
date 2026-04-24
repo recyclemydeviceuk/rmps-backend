@@ -39,8 +39,12 @@ async function markPaidAndNotify(lookup: Record<string, unknown>) {
       <p><strong>Phone:</strong> ${order.customerPhone}</p>
       <p><strong>Device:</strong> ${order.brand} ${order.model}</p>
       <p><strong>Repair:</strong> ${order.repairType}</p>
-      <p><strong>Postage:</strong> ${order.postageType}${order.postageType === 'collection' ? ' (Preston area collection)' : ''}</p>
-      ${order.postageType === 'collection' && order.collectionAddress ? `<p><strong>Collection Address:</strong> ${order.collectionAddress} (${order.collectionPostcode})</p>` : ''}
+      <p><strong>Postage:</strong> ${
+        order.postageType === 'print-label'   ? 'Print Your Own Label' :
+        order.postageType === 'send-pack'     ? 'Send Postage Pack'    :
+        order.postageType === 'send-your-own' ? 'Send Your Own'        :
+        order.postageType
+      }</p>
       <p><strong>Total:</strong> £${order.total.toFixed(2)}</p>
     `,
   ).catch(() => {});

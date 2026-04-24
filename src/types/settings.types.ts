@@ -11,7 +11,6 @@ export interface GeneralSettings {
 export interface OperationsSettings {
   maintenanceMode:     boolean;
   maintenanceMessage?: string;
-  collectionDelivery:  boolean;
 }
 
 export interface NotificationSettings {

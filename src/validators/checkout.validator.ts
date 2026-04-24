@@ -29,10 +29,7 @@ export const checkoutSchema = z.object({
   brand:         z.string().min(1, 'Brand is required').max(100),
   model:         z.string().min(1, 'Model is required').max(200),
   repairType:    z.string().min(1, 'Repair type is required').max(200),
-  postageType:   z.enum(['print-label', 'send-pack', 'collection'], { errorMap: () => ({ message: 'Valid postage type is required' }) }),
-  // For 'collection' (Preston area only), a full collection address is required
-  collectionAddress: z.string().min(5).max(300).optional(),
-  collectionPostcode: z.string().min(3).max(20).optional(),
+  postageType:   z.enum(['print-label', 'send-pack', 'send-your-own'], { errorMap: () => ({ message: 'Valid postage type is required' }) }),
   items:         z.array(orderItemSchema).min(1, 'At least one item required').max(20),
   addons:        z.array(addonItemSchema).max(10).optional().default([]),
 });

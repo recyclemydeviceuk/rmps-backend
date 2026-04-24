@@ -13,7 +13,6 @@ export interface ISettingsDoc extends Document {
   operations: {
     maintenanceMode:      boolean;
     maintenanceMessage?:  string;
-    collectionDelivery:   boolean;
   };
   notifications: {
     emailOnNewOrder:      boolean;
@@ -38,7 +37,6 @@ const schema = new Schema<ISettingsDoc>(
     operations: {
       maintenanceMode:    { type: Boolean, default: false },
       maintenanceMessage: { type: String },
-      collectionDelivery: { type: Boolean, default: true },
     },
     notifications: {
       emailOnNewOrder:      { type: Boolean, default: true  },

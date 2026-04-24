@@ -2,7 +2,7 @@ import { Schema, model, Document, Types } from 'mongoose';
 
 const ORDER_STATUSES   = ['pending', 'paid', 'processing', 'completed', 'failed', 'refunded', 'cancelled'] as const;
 const PAYMENT_STATUSES = ['unpaid', 'paid', 'refunded'] as const;
-const POSTAGE_TYPES    = ['print-label', 'send-pack', 'collection'] as const;
+const POSTAGE_TYPES    = ['print-label', 'send-pack', 'send-your-own'] as const;
 
 const orderItemSchema = new Schema({
   repairType:  { type: String, required: true },
@@ -29,8 +29,6 @@ export interface IOrderDoc extends Omit<Document, 'model'> {
   model:          string;
   repairType:     string;
   postageType:    typeof POSTAGE_TYPES[number];
-  collectionAddress?:  string;
-  collectionPostcode?: string;
   items:          { repairType: string; deviceModel: string; description?: string; quantity: number; unitPrice: number; totalPrice: number }[];
   subtotal:       number;
   discount:       number;
@@ -56,8 +54,6 @@ const schema = new Schema<IOrderDoc>(
     model:         { type: String, required: true },
     repairType:    { type: String, required: true },
     postageType:        { type: String, enum: POSTAGE_TYPES, required: true },
-    collectionAddress:  { type: String, trim: true },
-    collectionPostcode: { type: String, trim: true, uppercase: true },
     items:              [orderItemSchema],
     subtotal:      { type: Number, required: true },
     discount:      { type: Number, default: 0 },

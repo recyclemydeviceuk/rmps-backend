@@ -13,7 +13,6 @@ export const generalSettingsSchema = z.object({
 export const operationsSettingsSchema = z.object({
   maintenanceMode:     z.boolean().optional(),
   maintenanceMessage:  z.string().optional(),
-  collectionDelivery:  z.boolean().optional(),
 });
 
 export const notificationsSettingsSchema = z.object({
