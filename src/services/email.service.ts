@@ -1,23 +1,12 @@
-import { SendEmailCommand } from '@aws-sdk/client-ses';
-import { sesClient } from '../config/ses';
+import { brevoClient } from '../config/brevo';
 import { env } from '../config/env';
 import { logger } from '../utils/logger';
 
-// "Repair My Phone Screen" <mailer@zennara.in>
-const FROM = `"${env.AWS_SES_FROM_NAME}" <${env.AWS_SES_FROM_EMAIL}>`;
+const sender = { name: env.FROM_NAME_Brevo, email: env.FROM_EMAIL_Brevo };
 
-async function send(to: string | string[], subject: string, html: string): Promise<void> {
-  const toAddresses = Array.isArray(to) ? to : [to];
-  await sesClient.send(
-    new SendEmailCommand({
-      Source:      FROM,
-      Destination: { ToAddresses: toAddresses },
-      Message: {
-        Subject: { Data: subject, Charset: 'UTF-8' },
-        Body:    { Html: { Data: html,    Charset: 'UTF-8' } },
-      },
-    }),
-  );
+async function send(to: string | string[], subject: string, htmlContent: string): Promise<void> {
+  const toAddresses = (Array.isArray(to) ? to : [to]).map(email => ({ email }));
+  await brevoClient.post('/smtp/email', { sender, to: toAddresses, subject, htmlContent });
 }
 
 export class EmailService {
@@ -32,7 +21,7 @@ export class EmailService {
         <p>We'll be in touch once your repair is ready.</p>
       `,
     );
-    logger.info(`Order confirmation sent via SES to ${to} for ${orderNumber}`);
+    logger.info(`Order confirmation sent via Brevo to ${to} for ${orderNumber}`);
   }
 
   static async sendOrderStatusUpdate(to: string, orderNumber: string, status: string) {
@@ -47,8 +36,6 @@ export class EmailService {
   }
 
   static async sendAdminNotification(subject: string, html: string, to?: string) {
-    // Recipient is always passed by NotificationEmailService (settings.general.email).
-    // If it's missing, we skip silently rather than send to a stale env value.
     if (!to) return;
     await send(to, subject, html);
   }
@@ -74,5 +61,21 @@ export class EmailService {
         <p>We'll be in touch with next steps shortly.</p>
       `,
     );
+  }
+
+  static async sendAdminOtp(to: string, name: string, code: string) {
+    await send(
+      to,
+      'Your Admin Login Code — RepairMyPhoneScreen',
+      `
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px 24px">
+          <h2 style="margin:0 0 8px;font-size:20px;color:#111827">Admin Login Code</h2>
+          <p style="margin:0 0 24px;color:#6b7280;font-size:14px">Hi ${name}, use the code below to sign in. It expires in <strong>10 minutes</strong>.</p>
+          <div style="letter-spacing:10px;font-size:36px;font-weight:700;color:#dc2626;text-align:center;background:#fef2f2;border-radius:12px;padding:20px 0;margin-bottom:24px">${code}</div>
+          <p style="margin:0;color:#9ca3af;font-size:12px">If you didn't request this, you can safely ignore this email.</p>
+        </div>
+      `,
+    );
+    logger.info(`Admin OTP sent via Brevo to ${to}`);
   }
 }

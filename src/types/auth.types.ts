@@ -1,5 +1,3 @@
-export type AdminRole = 'super-admin';
-
 export interface AdminUser {
   _id:       string;
   name:      string;
@@ -8,9 +6,13 @@ export interface AdminUser {
   createdAt: Date;
 }
 
-export interface LoginCredentials {
-  email:    string;
-  password: string;
+export interface SendOtpInput {
+  email: string;
+}
+
+export interface VerifyOtpInput {
+  email: string;
+  code:  string;
 }
 
 export interface AuthResult {

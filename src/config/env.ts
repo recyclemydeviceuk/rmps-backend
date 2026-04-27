@@ -25,12 +25,10 @@ export const env = {
   AWS_S3_BUCKET_NAME:       process.env.AWS_S3_BUCKET_NAME       || '',
   AWS_S3_PUBLIC_BASE_URL:   (process.env.AWS_S3_PUBLIC_BASE_URL  || '').replace(/\/$/, ''),
 
-  // ── AWS SES (Email) ──────────────────────────────────────
-  AWS_ACCESS_KEY_ID:     process.env.AWS_ACCESS_KEY_ID     || '',
-  AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY || '',
-  AWS_SES_REGION:        process.env.AWS_SES_REGION        || 'ap-south-1',
-  AWS_SES_FROM_EMAIL:    process.env.AWS_SES_FROM_EMAIL    || 'noreply@repairmyphonescreen.co.uk',
-  AWS_SES_FROM_NAME:     process.env.AWS_SES_FROM_NAME     || 'Repair My Phone Screen',
+  // ── Brevo (Email) ────────────────────────────────────────
+  BREVO_API_KEY:    process.env.BREVO_API_KEY    || '',
+  FROM_EMAIL_Brevo: process.env.FROM_EMAIL_Brevo || 'info@repairmyphonescreen.co.uk',
+  FROM_NAME_Brevo:  process.env.FROM_NAME_Brevo  || 'Repair My Phone Screen',
 
   // ── PayPal ───────────────────────────────────────────────
   PAYPAL_CLIENT_ID:     process.env.PAYPAL_CLIENT_ID     || '',

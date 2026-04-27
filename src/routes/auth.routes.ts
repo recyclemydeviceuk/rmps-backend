@@ -1,14 +1,17 @@
 import { Router } from 'express';
-import { login, logout, getProfile } from '../controllers/auth.controller';
+import { sendOtp, verifyOtp, logout, getProfile } from '../controllers/auth.controller';
 import { authenticate } from '../middleware/auth';
 import { validateBody } from '../middleware/validate';
 import { authLimiter } from '../middleware/rateLimiter';
-import { loginSchema } from '../validators/auth.validator';
+import { sendOtpSchema, verifyOtpSchema } from '../validators/auth.validator';
 
 const router = Router();
 
-// POST /api/auth/login
-router.post('/login', authLimiter, validateBody(loginSchema), login);
+// POST /api/auth/send-otp  — request a login code
+router.post('/send-otp',   authLimiter, validateBody(sendOtpSchema),   sendOtp);
+
+// POST /api/auth/verify-otp — submit the code and get a JWT
+router.post('/verify-otp', authLimiter, validateBody(verifyOtpSchema), verifyOtp);
 
 // POST /api/auth/logout
 router.post('/logout', authenticate, logout);

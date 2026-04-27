@@ -1,6 +1,10 @@
 import { z } from 'zod';
 
-export const loginSchema = z.object({
-  email:    z.string().email('Invalid email'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+export const sendOtpSchema = z.object({
+  email: z.string().email('Invalid email address'),
+});
+
+export const verifyOtpSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  code:  z.string().length(6, 'OTP must be 6 digits'),
 });
