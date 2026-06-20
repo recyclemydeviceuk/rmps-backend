@@ -29,6 +29,10 @@ export const env = {
   BREVO_API_KEY:    process.env.BREVO_API_KEY    || '',
   FROM_EMAIL_Brevo: process.env.FROM_EMAIL_Brevo || 'info@repairmyphonescreen.co.uk',
   FROM_NAME_Brevo:  process.env.FROM_NAME_Brevo  || 'Repair My Phone Screen',
+  // Where admin/business notifications (new order, contact form, etc.) are sent.
+  // Falls back to the business inbox so notifications never silently disappear
+  // when no email is configured in the admin panel settings.
+  ADMIN_NOTIFY_EMAIL: process.env.ADMIN_NOTIFY_EMAIL || 'info@repairmyphonescreen.co.uk',
 
   // ── PayPal ───────────────────────────────────────────────
   PAYPAL_CLIENT_ID:     process.env.PAYPAL_CLIENT_ID     || '',

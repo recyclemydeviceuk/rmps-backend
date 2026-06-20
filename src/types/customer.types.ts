@@ -1,8 +1,10 @@
 export type CustomerStatus = 'active' | 'inactive' | 'banned';
 
 export interface ICustomerAddress {
-  street:   string;
+  line1:    string;
+  line2?:   string;
   city:     string;
+  county?:  string;
   postcode: string;
   country:  string;
 }

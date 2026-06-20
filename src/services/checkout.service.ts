@@ -14,6 +14,7 @@ export class CheckoutService {
     model:         string;
     repairType:    string;
     postageType:   'print-label' | 'send-pack' | 'send-your-own';
+    address:       { line1: string; line2?: string; city: string; county?: string; postcode: string; country?: string };
     items:         { repairTypeId: string; repairTypeName: string; modelId: string; modelName: string; quantity: number; unitPrice: number }[];
     addons?:       { addonId: string; name: string; price: number; selectedColor?: { name: string; hex: string } }[];
   }) {
@@ -44,14 +45,30 @@ export class CheckoutService {
       }
     }
 
+    // Normalize the shipping address once so it can be snapshotted onto the
+    // order and synced to the customer record.
+    const shippingAddress = {
+      line1:    data.address.line1.trim(),
+      line2:    data.address.line2?.trim() || undefined,
+      city:     data.address.city.trim(),
+      county:   data.address.county?.trim() || undefined,
+      postcode: data.address.postcode.trim(),
+      country:  data.address.country?.trim() || 'United Kingdom',
+    };
+
     // ── 2. Find or create customer record ────────────────────────────────────
     let customer = await Customer.findOne({ email: data.customerEmail.toLowerCase() });
     if (!customer) {
       customer = await Customer.create({
-        name:  data.customerName,
-        email: data.customerEmail.toLowerCase(),
-        phone: data.customerPhone,
+        name:    data.customerName,
+        email:   data.customerEmail.toLowerCase(),
+        phone:   data.customerPhone,
+        address: shippingAddress,
       });
+    } else {
+      // Keep the customer's address current with their latest order.
+      customer.address = shippingAddress;
+      await customer.save();
     }
 
     // ── 3. Build order items ─────────────────────────────────────────────────
@@ -120,6 +137,7 @@ export class CheckoutService {
       model:         data.model,
       repairType:    data.repairType,
       postageType:   data.postageType,
+      shippingAddress,
       items:         orderItems,
       subtotal,
       total:         subtotal,

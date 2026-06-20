@@ -21,6 +21,15 @@ const addonItemSchema = z.object({
   }).optional(),
 });
 
+const addressSchema = z.object({
+  line1:    z.string().min(1, 'Address line 1 is required').max(200),
+  line2:    z.string().max(200).optional().default(''),
+  city:     z.string().min(1, 'City is required').max(100),
+  county:   z.string().max(100).optional().default(''),
+  postcode: z.string().min(1, 'Postcode is required').max(20),
+  country:  z.string().max(100).optional().default('United Kingdom'),
+});
+
 export const checkoutSchema = z.object({
   customerName:  z.string().min(2, 'Full name is required').max(100),
   customerEmail: z.string().email('Valid email required').max(254),
@@ -30,6 +39,7 @@ export const checkoutSchema = z.object({
   model:         z.string().min(1, 'Model is required').max(200),
   repairType:    z.string().min(1, 'Repair type is required').max(200),
   postageType:   z.enum(['print-label', 'send-pack', 'send-your-own'], { errorMap: () => ({ message: 'Valid postage type is required' }) }),
+  address:       addressSchema,
   items:         z.array(orderItemSchema).min(1, 'At least one item required').max(20),
   addons:        z.array(addonItemSchema).max(10).optional().default([]),
 });

@@ -18,6 +18,18 @@ const orderNoteSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
+// Snapshot of the customer's shipping/contact address at the time the order
+// was placed. Kept on the order itself so historical orders are unaffected by
+// later edits to the customer record.
+const shippingAddressSchema = new Schema({
+  line1:    { type: String, required: true },
+  line2:    { type: String },
+  city:     { type: String, required: true },
+  county:   { type: String },
+  postcode: { type: String, required: true },
+  country:  { type: String, default: 'United Kingdom' },
+}, { _id: false });
+
 export interface IOrderDoc extends Omit<Document, 'model'> {
   orderNumber:    string;
   customerId?:    Types.ObjectId;
@@ -29,6 +41,7 @@ export interface IOrderDoc extends Omit<Document, 'model'> {
   model:          string;
   repairType:     string;
   postageType:    typeof POSTAGE_TYPES[number];
+  shippingAddress?: { line1: string; line2?: string; city: string; county?: string; postcode: string; country?: string };
   items:          { repairType: string; deviceModel: string; description?: string; quantity: number; unitPrice: number; totalPrice: number }[];
   subtotal:       number;
   discount:       number;
@@ -54,6 +67,7 @@ const schema = new Schema<IOrderDoc>(
     model:         { type: String, required: true },
     repairType:    { type: String, required: true },
     postageType:        { type: String, enum: POSTAGE_TYPES, required: true },
+    shippingAddress:    { type: shippingAddressSchema },
     items:              [orderItemSchema],
     subtotal:      { type: Number, required: true },
     discount:      { type: Number, default: 0 },

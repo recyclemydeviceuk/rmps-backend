@@ -3,8 +3,10 @@ import { Schema, model, Document } from 'mongoose';
 const CUSTOMER_STATUSES = ['active', 'inactive', 'banned'] as const;
 
 const addressSchema = new Schema({
-  street:   { type: String },
+  line1:    { type: String },
+  line2:    { type: String },
   city:     { type: String },
+  county:   { type: String },
   postcode: { type: String },
   country:  { type: String, default: 'United Kingdom' },
 }, { _id: false });
@@ -14,7 +16,7 @@ export interface ICustomerDoc extends Document {
   email:          string;
   phone:          string;
   status:         typeof CUSTOMER_STATUSES[number];
-  address?:       { street?: string; city?: string; postcode?: string; country?: string };
+  address?:       { line1?: string; line2?: string; city?: string; county?: string; postcode?: string; country?: string };
   totalOrders:    number;
   totalSpent:     number;
   lastOrderDate?: Date;

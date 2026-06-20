@@ -9,6 +9,7 @@
 
 import { Settings } from '../models/Settings';
 import { EmailService } from './email.service';
+import { env } from '../config/env';
 import { logger } from '../utils/logger';
 
 export class NotificationEmailService {
@@ -33,7 +34,9 @@ export class NotificationEmailService {
 
       if (!notif[toggle]) return; // disabled in admin panel
 
-      const adminEmail = to ?? settings?.general?.email;
+      // Prefer an explicit override, then the admin-panel configured email,
+      // then the env fallback so notifications are never silently dropped.
+      const adminEmail = to || settings?.general?.email || env.ADMIN_NOTIFY_EMAIL;
       await EmailService.sendAdminNotification(subject, html, adminEmail || undefined);
     } catch (err) {
       logger.error('NotificationEmailService.fireIfEnabled error:', err);
@@ -46,9 +49,9 @@ export class NotificationEmailService {
   static async getAdminEmail(): Promise<string> {
     try {
       const settings = await Settings.findOne().lean();
-      return settings?.general?.email ?? '';
+      return settings?.general?.email || env.ADMIN_NOTIFY_EMAIL;
     } catch {
-      return '';
+      return env.ADMIN_NOTIFY_EMAIL;
     }
   }
 }

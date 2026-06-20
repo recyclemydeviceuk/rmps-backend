@@ -45,6 +45,14 @@ async function markPaidAndNotify(lookup: Record<string, unknown>) {
         order.postageType === 'send-your-own' ? 'Send Your Own'        :
         order.postageType
       }</p>
+      ${order.shippingAddress ? `<p><strong>Address:</strong><br>${[
+        order.shippingAddress.line1,
+        order.shippingAddress.line2,
+        order.shippingAddress.city,
+        order.shippingAddress.county,
+        order.shippingAddress.postcode,
+        order.shippingAddress.country,
+      ].filter(Boolean).join('<br>')}</p>` : ''}
       <p><strong>Total:</strong> £${order.total.toFixed(2)}</p>
     `,
   ).catch(() => {});

@@ -7,8 +7,10 @@ export const updateCustomerSchema = z.object({
   phone:   z.string().optional(),
   status:  z.enum(CUSTOMER_STATUSES).optional(),
   address: z.object({
-    street:   z.string().optional(),
+    line1:    z.string().optional(),
+    line2:    z.string().optional(),
     city:     z.string().optional(),
+    county:   z.string().optional(),
     postcode: z.string().optional(),
     country:  z.string().optional(),
   }).optional(),

@@ -138,7 +138,7 @@ export class OrdersService {
 
   static async trackByOrderNumber(orderNumber: string) {
     const order = await Order.findOne({ orderNumber: orderNumber.toUpperCase().trim() }).select(
-      'orderNumber status customerName customerEmail customerPhone device brand model repairType items subtotal discount total createdAt completedAt',
+      'orderNumber status customerName customerEmail customerPhone device brand model repairType shippingAddress items subtotal discount total createdAt completedAt',
     );
     if (!order) throw Object.assign(new Error('Order not found'), { statusCode: 404 });
     return order;
